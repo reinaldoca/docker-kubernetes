@@ -1,0 +1,46 @@
+sudo dnf -y update
+sudo reboot
+sudo dnf -y install dnf-plugins-core
+sudo tee /etc/yum.repos.d/docker-ce.repo<<EOF
+[docker-ce-stable]
+name=Docker CE Stable - \$basearch
+baseurl=https://download.docker.com/linux/fedora/34/\$basearch/stable
+enabled=1
+gpgcheck=1
+gpgkey=https://download.docker.com/linux/fedora/gpg
+EOF
+sudo dnf makecache
+sudo dnf install docker-ce docker-ce-cli containerd.io
+sudo systemctl enable --now docker
+systemctl status docker
+
+sudo usermod -aG docker $(whoami)
+newgrp docker
+
+Test
+
+docker pull alpine
+docker run -it --rm alpine /bin/sh
+/ # apk update
+/ # exit
+
+Docker Compose
+
+sudo dnf -y install docker-compose
+sudo dnf -y install wget
+curl -s https://api.github.com/repos/docker/compose/releases/latest \
+  | grep browser_download_url \
+  | grep docker-compose-Linux-x86_64 \
+  | cut -d '"' -f 4 \
+  | wget -qi -
+
+chmod +x docker-compose-Linux-x86_64
+sudo mv docker-compose-Linux-x86_64 /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+docker-compose --version
+docker-compose version 1.28.6, build 5db8d86f
+
+sudo curl -L https://raw.githubusercontent.com/docker/compose/master/contrib/completion/bash/docker-compose -o /etc/bash_completion.d/docker-compose
+
+
+  
